@@ -6,5 +6,5 @@ Simulating data for analysis of gene-based tests for GWAS analysis. Please see e
 Can install using the devtools package, i.e.
 ```{r} 
 library("devtools") 
-devtools::install_github("weinstockj/gwasswim")
+devtools::install_github("weinstockj/gwassim")
 ```
