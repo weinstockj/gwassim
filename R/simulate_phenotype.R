@@ -6,7 +6,7 @@
 #' causal blocks, causal markers, and structure
 
 
-simPhenotype = function(config, gene){
+simPhenotype = function(config, gene, verbose = F){
   N_CAUSAL_PER_BLOCKS = config[["N_CAUSAL_PER_BLOCK"]]
   N_CAUSAL = config[["N_CAUSAL"]]
   N_BLOCKS = config[["N_BLOCKS"]]
@@ -55,10 +55,12 @@ simPhenotype = function(config, gene){
     chosenMarkers = NULL
     causalString = "SNPs do not explain phenotype; no causal string"
   }
-  cat(sprintf("\nChosen SNPs: %s", paste(chosenMarkers, collapse = ", ")))
-  cat(sprintf("\nChosen Blocks: %s", paste(chosenBlocks, collapse = ", ")))
-  cat(sprintf("\nCausal structure is: %s", causalString))
-  if(PHENO_DIST == "gaussian"){
+  if(verbose){
+    cat(sprintf("\nChosen SNPs: %s", paste(chosenMarkers, collapse = ", ")))
+    cat(sprintf("\nChosen Blocks: %s", paste(chosenBlocks, collapse = ", ")))
+    cat(sprintf("\nCausal structure is: %s", causalString))
+  }
+ if(PHENO_DIST == "gaussian"){
 
   } else if(PHENO_DIST == "binomial") {
     # pass through sigmoid
@@ -66,12 +68,6 @@ simPhenotype = function(config, gene){
   } else {
     stop("Phenotype distribution needs to be gaussian or binomial")
   }
-  phenoList = list(phenotype = phenonew,
-    blocks = chosenBlocks,
-    markers = chosenMarkers, causalString = causalString, dist = PHENO_DIST)
-  pheno = eval(parse(text = causalString), envir = as.data.frame(gene))
-  phenonew = pheno + rnorm(n = length(pheno), mean = 0,
-    sqrt(PHENO_SD ^ 2 - var(pheno)))
   phenoList = list(phenotype = phenonew, blocks = chosenBlocks,
     markers = chosenMarkers, causalString = causalString)
   class(phenoList) = "phenosim"

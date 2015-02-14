@@ -1,8 +1,7 @@
 sidaks = function(gwas){
   result = min(gwas$pvalue)
   result = 1 - (1 - result) ^ nrow(gwas)
-  print(result)
-  invisible(result)
+  return(result)
 }
 
 fisher = function(gwas){
@@ -13,14 +12,12 @@ fisher = function(gwas){
     return(pval)
   }
   result = fisherHelper(gwas)
-  print(result)
-  invisible(result)
+  return(result)
 }
 
 ccaTest = function(gene, pheno){
   result = as.numeric(geneCCA(gene, pheno$phenotype))
-  print(result)
-  invisible(result)
+  return(result)
 }
 
 vegas = function(gene, gwas){
@@ -29,10 +26,10 @@ vegas = function(gene, gwas){
   if(pval < 0.1){
     N = 10 ^ 4
     pval = vegasHelper(gene, gwas, N)
-    if(pval < 0.001){
-      N = 10 ^ 6
-      pval = vegasHelper(gene, gwas, N)
-    }
+#     if(pval < 0.001){
+#       N = 10 ^ 6
+#       pval = vegasHelper(gene, gwas, N)
+#     }
   }
   return(pval)
 }

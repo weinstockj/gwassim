@@ -41,6 +41,7 @@ simBlock = function(config){
 
 simBlockSet = function(config){
   N_BLOCKS = config[["N_BLOCKS"]]
+  BLOCK_COR = config[["BLOCK_COR"]]
   blockList = list()
   for(i in 1:N_BLOCKS){
     if(!length(blockList)){
