@@ -68,7 +68,7 @@ gatesHelper = function(gene, snp_names){
   decomp = eigen(mat)
   eigenvals = decomp$values
   eigenvals = eigenvals[eigenvals > 1]
-  val = sum((eigenvals - 1) * eigenvals)
+  val = sum(eigenvals - 1)
   M = length(snp_names) - val
   return(M)
 }
