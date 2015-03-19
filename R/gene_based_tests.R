@@ -4,13 +4,14 @@ sidaks = function(gwas){
   return(result)
 }
 
+fisherHelper = function(x){
+  k = nrow(x)
+  chi = -2 * sum(log(x$pvalue))
+  pval = pchisq(chi, df = 2 * k, lower.tail = F)
+  return(pval)
+}
+
 fisher = function(gwas){
-  fisherHelper = function(x){
-    k = nrow(x)
-    chi = -2 * sum(log(x$pvalue))
-    pval = pchisq(chi, df = 2 * k, lower.tail = F)
-    return(pval)
-  }
   result = fisherHelper(gwas)
   return(result)
 }
@@ -57,7 +58,7 @@ gates = function(gene, gwas){
 }
 
 gatesHelper = function(gene, snp_names){
-  stopifnot(inherits(gene, "genosim"))
+  # stopifnot(inherits(gene, "genosim"))
   markers = gene[, snp_names, drop = F]
   mat = cor(markers)
   changeR = function(x) {
@@ -71,4 +72,31 @@ gatesHelper = function(gene, snp_names){
   val = sum(eigenvals - 1)
   M = length(snp_names) - val
   return(M)
+}
+
+hyst = function(gene, gwas, config, est_blocks = FALSE){
+  if(est_blocks) {
+    est_n_blocks = sum(eigen(cor(gene)) > 1)
+    pca_decomp = princomp(gene)
+    hap_blocks = apply(pca_decomp, 1, which.max) # chooses block to load on to
+    gwas$block = hap_blocks
+  } else {
+    blocks = blockFromSnp(colnames(gene), config)
+    res = numeric(length = length(unique(blocks)))
+    index = 1
+    for(b in unique(blocks)) {
+      snps = which(blocks == b)
+      geneSub = gene[, snps]
+      gwasSub = gwas[snps, ]
+      res[index] = gates(geneSub, gwasSub)
+      index = index + 1
+    }
+    pval = fisherHelper(data.frame(pvalue = res))
+#     res = lapply(split(gene, f = factor(blocks)),
+#       function(x) gates(x, gwas))
+#     res = unlist(res)
+#     res = data.frame(pvalue = res)
+#     pval = fisherHelper(res)
+    return(pval)
+  }
 }
