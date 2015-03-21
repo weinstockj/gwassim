@@ -44,17 +44,23 @@ vegasHelper = function(gene, gwas, N) {
   return(p)
 }
 
-gates = function(gene, gwas){
+gates = function(gene, gwas, retKeySnp = FALSE){
   gwas = gwas[order(gwas$pvalue), ] # order by ascending pvalue
   M = gatesHelper(gene, gwas$snp)
-  N_LIMITS = 25
+  N_LIMITS = 35
   if(nrow(gwas) > N_LIMITS){
     gwas = gwas[1:N_LIMITS, ]
   }
   indices = 1:nrow(gwas)
   gwas$m = sapply(indices, function(x) gatesHelper(gene, gwas$snp[1:x]))
   gwas$adjpval = M * gwas$pvalue / gwas$m
-  return(min(gwas$adjpval))
+  if(!retKeySnp) {
+    return(min(gwas$adjpval))
+  } else {
+    vec = c(min(gwas$adjpval), which.min(gwas$adjpval))
+    names(vec) = c("pvalue", "index")
+    return(vec)
+  }
 }
 
 gatesHelper = function(gene, snp_names){
@@ -82,21 +88,36 @@ hyst = function(gene, gwas, config, est_blocks = FALSE){
     gwas$block = hap_blocks
   } else {
     blocks = blockFromSnp(colnames(gene), config)
-    res = numeric(length = length(unique(blocks)))
+    res = data.frame(pvalue = numeric(length = length(unique(blocks))),
+      key = numeric(length = length(unique(blocks))))
     index = 1
     for(b in unique(blocks)) {
       snps = which(blocks == b)
       geneSub = gene[, snps]
       gwasSub = gwas[snps, ]
-      res[index] = gates(geneSub, gwasSub)
+      res[index, 1:2] = gates(geneSub, gwasSub, TRUE)
       index = index + 1
     }
-    pval = fisherHelper(data.frame(pvalue = res))
-#     res = lapply(split(gene, f = factor(blocks)),
-#       function(x) gates(x, gwas))
-#     res = unlist(res)
-#     res = data.frame(pvalue = res)
-#     pval = fisherHelper(res)
+    pval = scaleTest(res, gene)
     return(pval)
   }
+}
+
+scaleTest = function(res, gene){
+  chi = -2 * sum(log(res$pvalue))
+  subLD = cor(gene[, res$key])
+  scaleVal = 0
+  N_COLS = ncol(subLD)
+  for(i in 1:N_COLS) {
+    for(j in 1:N_COLS) {
+      if(i < j){
+        rprime = subLD[i, j]
+        scaleVal = scaleVal + rprime * (3.25 + 0.75 * rprime)
+      }
+    }
+  }
+  scaleVal = 1 + scaleVal / (2 * N_COLS)
+  df = (2 * N_COLS) / scaleVal
+  pval = pchisq(chi, df = df, ncp = scaleVal, lower.tail = F)
+  return(pval)
 }
