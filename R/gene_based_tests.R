@@ -89,23 +89,28 @@ hyst = function(gene, gwas, config, est_blocks = FALSE){
   } else {
     blocks = blockFromSnp(colnames(gene), config)
     res = data.frame(pvalue = numeric(length = length(unique(blocks))),
-      key = numeric(length = length(unique(blocks))))
+      key = numeric(length = length(unique(blocks))),
+      block = numeric(length = length(unique(blocks))))
     index = 1
     for(b in unique(blocks)) {
       snps = which(blocks == b)
       geneSub = gene[, snps]
       gwasSub = gwas[snps, ]
       res[index, 1:2] = gates(geneSub, gwasSub, TRUE)
+      res[index, 3] = b
       index = index + 1
     }
-    pval = scaleTest(res, gene)
+    pval = scaleTest(res, gene, config)
     return(pval)
   }
 }
 
-scaleTest = function(res, gene){
+scaleTest = function(res, gene, config) {
+  N_BLOCKS = config[["N_BLOCKS"]]
+  N_MARKERS = config[["N_MARKERS"]]
   chi = -2 * sum(log(res$pvalue))
-  subLD = cor(gene[, res$key])
+  markers = N_MARKERS * (res$block - 1) + res$key
+  subLD = cor(gene[, markers])
   scaleVal = 0
   N_COLS = ncol(subLD)
   for(i in 1:N_COLS) {
