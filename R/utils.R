@@ -1,13 +1,13 @@
 setConfiguration = function(N_MARKERS, LD,
   sigma, N_COV, ALLELEFRQ, N_STRANDS, N_ALLELES = N_MARKERS * 2,
   N_BLOCKS, BLOCK_COR, EFFECT_SIZE = .01, N_CAUSAL = 5, N_CAUSAL_PER_BLOCK = 1,
-  PHENO_SD = 3, PHENO_DIST = "gaussian"){
+  PHENO_SD = 3, PHENO_DIST = "gaussian", COR_NOISE_VAR = 0){
   list(N_MARKERS = N_MARKERS, N_ALLELES = N_ALLELES,
     LD = LD, sigma = sigma, N_COV = N_COV,
     ALLELEFRQ = ALLELEFRQ, N_STRANDS = N_STRANDS, N_BLOCKS = N_BLOCKS,
     BLOCK_COR = BLOCK_COR, EFFECT_SIZE = EFFECT_SIZE,
     N_CAUSAL = N_CAUSAL, N_CAUSAL_PER_BLOCK = N_CAUSAL_PER_BLOCK,
-    PHENO_SD = PHENO_SD, PHENO_DIST = PHENO_DIST)
+    PHENO_SD = PHENO_SD, PHENO_DIST = PHENO_DIST, COR_NOISE_VAR = COR_NOISE_VAR)
 }
 
 simCov = function(config, limitZ = 1){
@@ -164,3 +164,17 @@ blockFromSnp = function(snpname, config){
 }
 
 blockFromSnp = Vectorize(blockFromSnp, vectorize.args = "snpname")
+
+addCorNoise = function(mat, config) {
+  N_ROWS = nrow(mat)
+  N_COLS = ncol(mat)
+  if(N_ROWS != N_COLS) {
+    stop("matrix is not square")
+  }
+  COR_NOISE_VAR = config[["COR_NOISE_VAR"]]
+  mu = rep(0, N_COLS)
+  sigma = diag(N_COLS) * COR_NOISE_VAR
+  noise = MASS::mvrnorm(N_COLS, mu, sigma)
+  noise[lower.tri(noise)] = t(noise)[lower.tri(noise)]
+  return(mat + noise)
+}

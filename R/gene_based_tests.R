@@ -44,15 +44,16 @@ vegasHelper = function(gene, gwas, N) {
   return(p)
 }
 
-gates = function(gene, gwas, retKeySnp = FALSE){
+gates = function(gene, gwas, config, retKeySnp = FALSE){
   gwas = gwas[order(gwas$pvalue), ] # order by ascending pvalue
-  M = gatesHelper(gene, gwas$snp)
+  M = gatesHelper(gene, gwas$snp, config)
   N_LIMITS = 35
   if(nrow(gwas) > N_LIMITS){
     gwas = gwas[1:N_LIMITS, ]
   }
   indices = 1:nrow(gwas)
-  gwas$m = sapply(indices, function(x) gatesHelper(gene, gwas$snp[1:x]))
+  gwas$m = sapply(indices,
+    function(x) gatesHelper(gene, gwas$snp[1:x], config))
   gwas$adjpval = M * gwas$pvalue / gwas$m
   if(!retKeySnp) {
     return(min(gwas$adjpval))
@@ -63,10 +64,10 @@ gates = function(gene, gwas, retKeySnp = FALSE){
   }
 }
 
-gatesHelper = function(gene, snp_names){
+gatesHelper = function(gene, snp_names, config){
   # stopifnot(inherits(gene, "genosim"))
   markers = gene[, snp_names, drop = F]
-  mat = cor(markers)
+  mat = addCorNoise(cor(markers), config)
   changeR = function(x) {
     0.2982 * x ^ 6 - 0.0127 * x ^ 5 + 0.0588 * x ^ 4 +
       0.0099 * x ^ 3 + 0.628 * x ^ 2 - 0.0009 * x
@@ -80,29 +81,22 @@ gatesHelper = function(gene, snp_names){
   return(M)
 }
 
-hyst = function(gene, gwas, config, est_blocks = FALSE){
-  if(est_blocks) {
-    est_n_blocks = sum(eigen(cor(gene)) > 1)
-    pca_decomp = princomp(gene)
-    hap_blocks = apply(pca_decomp, 1, which.max) # chooses block to load on to
-    gwas$block = hap_blocks
-  } else {
-    blocks = blockFromSnp(colnames(gene), config)
-    res = data.frame(pvalue = numeric(length = length(unique(blocks))),
-      key = numeric(length = length(unique(blocks))),
-      block = numeric(length = length(unique(blocks))))
-    index = 1
-    for(b in unique(blocks)) {
-      snps = which(blocks == b)
-      geneSub = gene[, snps]
-      gwasSub = gwas[snps, ]
-      res[index, 1:2] = gates(geneSub, gwasSub, TRUE)
-      res[index, 3] = b
-      index = index + 1
-    }
-    pval = scaleTest(res, gene, config)
-    return(pval)
+hyst = function(gene, gwas, config){
+  blocks = blockFromSnp(colnames(gene), config)
+  res = data.frame(pvalue = numeric(length = length(unique(blocks))),
+    key = numeric(length = length(unique(blocks))),
+    block = numeric(length = length(unique(blocks))))
+  index = 1
+  for(b in unique(blocks)) {
+    snps = which(blocks == b)
+    geneSub = gene[, snps]
+    gwasSub = gwas[snps, ]
+    res[index, 1:2] = gates(geneSub, gwasSub, config, TRUE)
+    res[index, 3] = b
+    index = index + 1
   }
+  pval = scaleTest(res, gene, config)
+  return(pval)
 }
 
 scaleTest = function(res, gene, config) {

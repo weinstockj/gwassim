@@ -18,7 +18,8 @@ Imports:
   Matrix,
   Rcpp (>= 0.11.2),
   mvtnorm,
-  LDheatmap
+  LDheatmap,
+  MASS
 Suggests:
  parallel
 
