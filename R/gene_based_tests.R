@@ -95,7 +95,11 @@ hyst = function(gene, gwas, config){
     res[index, 3] = b
     index = index + 1
   }
-  pval = scaleTest(res, gene, config)
+  if(nrow(res) > 1) {
+    pval = scaleTest(res, gene, config)
+  } else {
+    pval = res$pvalue
+  }
   return(pval)
 }
 
