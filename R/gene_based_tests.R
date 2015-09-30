@@ -124,3 +124,13 @@ scaleTest = function(res, gene, config) {
   pval = pchisq(chi, df = df, ncp = scaleVal, lower.tail = F)
   return(pval)
 }
+
+skat = function(gene, pheno) {
+  # Z is matrix of SNPs, in dosage format
+  # SKAT fails if class(obj) != "matrix"
+  Z = gene
+  class(Z)= "matrix"
+  obj = SKAT::SKAT_Null_Model(pheno$phenotype ~ 1)
+  mod = SKAT::SKAT(Z, obj)
+  return(mod$p.value)
+}
