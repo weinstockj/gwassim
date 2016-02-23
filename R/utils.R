@@ -1,8 +1,8 @@
-setConfiguration = function(N_MARKERS, LD,
+setConfiguration_ = function(N_MARKERS, LD, simple_interface,
   sigma, N_COV, ALLELEFRQ, N_STRANDS, N_ALLELES = N_MARKERS * 2,
   N_BLOCKS, BLOCK_COR, EFFECT_SIZE = .01, N_CAUSAL = 5, N_CAUSAL_PER_BLOCK = 1,
   PHENO_SD = 3, PHENO_DIST = "gaussian", COR_NOISE_VAR = 0){
-  list(N_MARKERS = N_MARKERS, N_ALLELES = N_ALLELES,
+  list(N_MARKERS = N_MARKERS, N_ALLELES = N_ALLELES, simple_interface = simple_interface,
     LD = LD, sigma = sigma, N_COV = N_COV,
     ALLELEFRQ = ALLELEFRQ, N_STRANDS = N_STRANDS, N_BLOCKS = N_BLOCKS,
     BLOCK_COR = BLOCK_COR, EFFECT_SIZE = EFFECT_SIZE,
@@ -10,18 +10,51 @@ setConfiguration = function(N_MARKERS, LD,
     PHENO_SD = PHENO_SD, PHENO_DIST = PHENO_DIST, COR_NOISE_VAR = COR_NOISE_VAR)
 }
 
+setConfiguration = function(LD, N_BLOCKS, N_MARKERS) {
+  stopifnot(LD %in% c("low", "medium", "high"))
+  LD = switch(LD,
+              "low" = .3,
+              "medium" = .5,
+              "high" = .7)
+  N_COV = 1
+  sigma = matrix(LD, nrow = N_MARKERS, ncol = N_MARKERS)
+  diag(sigma) = 1
+  N_BLOCKS = 1
+  ALLELEFRQ = runif(N_MARKERS, .05, .95)
+  N_STRANDS = 2000
+  BLOCK_COR = .15
+  N_CAUSAL = 1
+  EFFECT_SIZE = .01
+  PHENO_DIST = "gaussian"
+  COR_NOISE_VAR = .02
+  config = setConfiguration(N_MARKERS = N_MARKERS,
+                            LD = LD, sigma = sigma, N_COV = N_COV, ALLELEFRQ = ALLELEFRQ,
+                            N_STRANDS = N_STRANDS,
+                            N_BLOCKS = N_BLOCKS,
+                            BLOCK_COR = BLOCK_COR, N_CAUSAL = N_CAUSAL,
+                            PHENO_DIST = PHENO_DIST,
+                            EFFECT_SIZE = EFFECT_SIZE, COR_NOISE_VAR = COR_NOISE_VAR)
+
+}
+
 simCov = function(config, limitZ = 1){
   N_MARKERS = config[["N_MARKERS"]]
   N_COV = config[["N_COV"]]
   sigma = config[["sigma"]]
-  z = Inf
-  while(z > limitZ){
-    sim = rWishart(N_COV, N_MARKERS, sigma)[, , 1]
-    z = psych::cortest(cor(sim), sigma, n1 = N_MARKERS ^ 2)$z
-  }
-  sim = as.matrix(matrix::nearPD(sim)$mat)
-  return(sim)
+  simple_interface = config[["simple_interface"]]
+  if(simple_interface) {
+    return(sigma)
+  } else {
+      z = Inf
+      while(z > limitZ){
+        sim = rWishart(N_COV, N_MARKERS, sigma)[, , 1]
+        z = psych::cortest(cor(sim), sigma, n1 = N_MARKERS ^ 2)$z
+      }
+      sim = as.matrix(matrix::nearPD(sim)$mat)
+      return(sim)
+    }
 }
+
 
 simBlockR = function(block1, block2){
   res = cancor(block1, block2)$cor

@@ -5,7 +5,7 @@ Authors@R: as.person(c(
     "Josh Weinstock <jwein22@emory.edu> [aut, cre]",
     "Hasse Walum <hasse.walum@emory.edu> [aut]"
   ))
-Description: Provides functions for simulating GWAS data and applyingene-based tests
+Description: Provides functions for simulating GWAS data and applying gene-based tests
 Depends: R (>= 3.1.0)
 License: What license is it under?
 LazyData: true
