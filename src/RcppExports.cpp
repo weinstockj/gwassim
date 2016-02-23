@@ -12,15 +12,11 @@ using namespace Rcpp;
 std::vector<int> traverse_cor(NumericMatrix x, float maxcor);
 static SEXP gwassim_traverse_cor_try(SEXP xSEXP, SEXP maxcorSEXP) {
 BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP );
-        Rcpp::traits::input_parameter< float >::type maxcor(maxcorSEXP );
-        std::vector<int> __result = traverse_cor(x, maxcor);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
+    Rcpp::RObject __result;
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< float >::type maxcor(maxcorSEXP);
+    __result = Rcpp::wrap(traverse_cor(x, maxcor));
+    return __result;
 END_RCPP_RETURN_ERROR
 }
 RcppExport SEXP gwassim_traverse_cor(SEXP xSEXP, SEXP maxcorSEXP) {
