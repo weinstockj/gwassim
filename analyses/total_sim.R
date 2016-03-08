@@ -1,8 +1,11 @@
 library("gwassim")
 library("parallel")
 
+RESULT_FILE = "analyses/simulation_results.csv"
+N_SIM = 1000
+
 N_MARKERS = 5
-LD = sqrt(.3)
+LD = .7
 N_COV = 1
 sigma = matrix(LD, nrow = N_MARKERS, ncol = N_MARKERS)
 diag(sigma) = 1
@@ -43,19 +46,19 @@ totalSim = function(config){
 }
 
 #type 1
-ncores = parallel::detectCores() - 1
-ptm <- proc.time()
-N_SIM = 500
-cl = makeCluster(ncores)
-clusterExport(cl, varlist = c("totalSim", "config"))
-clusterEvalQ(cl, {library(gwassim)})
-res = parLapply(cl, 1:N_SIM, function(x) totalSim(config))
-stopCluster(cl)
-res = Reduce("rbind", res)
-proc.time() - ptm
-# colMeans(res)
-lapply(res[, 5:ncol(res)], function(x) prop.table(table(x < .05)))
-# 2.26 seconds..per sim
+# ncores = parallel::detectCores() - 1
+# ptm <- proc.time()
+# N_SIM = 500
+# cl = makeCluster(ncores)
+# clusterExport(cl, varlist = c("totalSim", "config"))
+# clusterEvalQ(cl, {library(gwassim)})
+# res = parLapply(cl, 1:N_SIM, function(x) totalSim(config))
+# stopCluster(cl)
+# res = Reduce("rbind", res)
+# proc.time() - ptm
+# # colMeans(res)
+# lapply(res[, 5:ncol(res)], function(x) prop.table(table(x < .05)))
+# # 2.26 seconds..per sim
 
 #type 2
 ptm <- proc.time()
@@ -66,6 +69,27 @@ res = parLapply(cl, 1:N_SIM, function(x) totalSim(config))
 stopCluster(cl)
 res = Reduce("rbind", res)
 proc.time() - ptm
-colMeans(res)
-lapply(res[, 5:ncol(res)], function(x) 1 - prop.table(table(x > .05)))
 #
+resSummary = dplyr::summarize_each(res, dplyr::funs(. = sum(. < .05) / n()))
+
+pars =  c("EFFECT_SIZE",
+          "N_MARKERS",
+          "N_BLOCKS",
+          "LD",
+          "N_CAUSAL",
+          "COR_NOISE_VAR")
+
+for(par in pars) {
+  resSummary[[par]] = config[[par]]
+}
+
+resSummar$N_SIM = N_SIM
+
+resSummary = resSummary[c(pars, setdiff(names(resSummary), pars))]
+
+if(!file.exists(RESULT_FILE)) {
+  write.table(resSummary, file = RESULT_FILE, row.names = F, sep = ",")
+} else {
+  write.table(resSummary, file = RESULT_FILE, row.names = F, append = T, sep = ","
+              headers = F)
+}
