@@ -5,11 +5,11 @@ RESULT_FILE = "analyses/simulation_results.csv"
 N_SIM = 1000
 
 N_MARKERS = 5
-LD = .7
+LD = .3
 N_COV = 1
 sigma = matrix(LD, nrow = N_MARKERS, ncol = N_MARKERS)
 diag(sigma) = 1
-N_BLOCKS = 3
+N_BLOCKS = 6
 ALLELEFRQ = runif(N_MARKERS, .05, .95)
 N_STRANDS = 2000
 BLOCK_COR = .15
@@ -45,8 +45,8 @@ totalSim = function(config){
   return(res)
 }
 
+ncores = parallel::detectCores() - 1
 #type 1
-# ncores = parallel::detectCores() - 1
 # ptm <- proc.time()
 # N_SIM = 500
 # cl = makeCluster(ncores)
@@ -83,13 +83,14 @@ for(par in pars) {
   resSummary[[par]] = config[[par]]
 }
 
-resSummar$N_SIM = N_SIM
+resSummary$N_SIM = N_SIM
+resSummary$type = ifelse(resSummary$EFFECT_SIZE == 0, "type 1", "type 2")
 
 resSummary = resSummary[c(pars, setdiff(names(resSummary), pars))]
 
 if(!file.exists(RESULT_FILE)) {
   write.table(resSummary, file = RESULT_FILE, row.names = F, sep = ",")
 } else {
-  write.table(resSummary, file = RESULT_FILE, row.names = F, append = T, sep = ","
-              headers = F)
+  write.table(resSummary, file = RESULT_FILE, row.names = F, append = T, sep = ",",
+              col.names = F)
 }
