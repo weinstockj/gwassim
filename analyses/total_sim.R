@@ -9,7 +9,7 @@ LD = .3
 N_COV = 1
 sigma = matrix(LD, nrow = N_MARKERS, ncol = N_MARKERS)
 diag(sigma) = 1
-N_BLOCKS = 6
+N_BLOCKS = 3
 ALLELEFRQ = runif(N_MARKERS, .05, .95)
 N_STRANDS = 2000
 BLOCK_COR = .15
@@ -42,6 +42,7 @@ totalSim = function(config){
   res$gates = gates(gene1, gwas, config)
   res$hyst = hyst(gene1, gwas, config)
   res$magma = MAGMA(pheno$phenotype, gene1)
+  res$skat = skat(gene1, pheno = pheno)
   return(res)
 }
 
