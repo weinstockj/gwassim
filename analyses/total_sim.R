@@ -5,16 +5,16 @@ RESULT_FILE = "analyses/simulation_results.csv"
 N_SIM = 1000
 
 N_MARKERS = 5
-LD = .3
+LD = .7
 N_COV = 1
 sigma = matrix(LD, nrow = N_MARKERS, ncol = N_MARKERS)
 diag(sigma) = 1
-N_BLOCKS = 3
+N_BLOCKS = 6
 ALLELEFRQ = runif(N_MARKERS, .05, .95)
 N_STRANDS = 2000
 BLOCK_COR = .15
 N_CAUSAL = 3
-EFFECT_SIZE = .01
+EFFECT_SIZE = .0
 PHENO_DIST = "gaussian"
 COR_NOISE_VAR = .0
 config = setConfiguration_(N_MARKERS = N_MARKERS,
