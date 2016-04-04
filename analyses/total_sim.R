@@ -14,7 +14,7 @@ ALLELEFRQ = runif(N_MARKERS, .05, .95)
 N_STRANDS = 2000
 BLOCK_COR = .15
 N_CAUSAL = 3
-EFFECT_SIZE = .0
+EFFECT_SIZE = .05
 PHENO_DIST = "gaussian"
 COR_NOISE_VAR = .0
 config = setConfiguration_(N_MARKERS = N_MARKERS,
