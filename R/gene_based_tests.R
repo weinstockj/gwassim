@@ -11,7 +11,9 @@ fisherHelper = function(x){
   return(pval)
 }
 
-fisher = function(gwas){
+fisher = name <- function(variables) {
+  
+}
   result = fisherHelper(gwas)
   return(result)
 }
@@ -125,12 +127,19 @@ scaleTest = function(res, gene, config) {
   return(pval)
 }
 
-skat = function(gene, pheno) {
+skat = function(gene, pheno, config) {
   # Z is matrix of SNPs, in dosage format
   # SKAT fails if class(obj) != "matrix"
+  PHENO_DIST = config[["PHENO_DIST"]]
+  SKAT_DIST_LABEL = switch(PHENO_DIST,
+                           "gaussian" = "C",
+                           "binomial" = "D")
   Z = gene
-  class(Z)= "matrix"
-  obj = SKAT::SKAT_Null_Model(pheno$phenotype ~ 1)
+  Z_classes = class(Z)
+  NECESSARY_CLASS = "matrix"
+  # class(Z) = c(NECESSARY_CLASS, setdiff(Z_classes, NECESSARY_CLASS))
+  class(Z) = NECESSARY_CLASS
+  obj = SKAT::SKAT_Null_Model(pheno$phenotype ~ 1, out_type = SKAT_DIST_LABEL)
   mod = SKAT::SKAT(Z, obj)
   return(mod$p.value)
 }
