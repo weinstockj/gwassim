@@ -136,11 +136,11 @@ skat = function(gene, pheno) {
 }
 
 
-MAGMA <- function(phenotype, SNP_matrix, prune = .10){
+MAGMA <- function(phenotype, SNP_matrix, prune = .001){
   pc <- princomp(SNP_matrix, cor=FALSE, scores=TRUE)
   pc2 <- cumsum(pc$sdev^2/sum(pc$sdev^2))
-  k <- length(pc2[pc2<=prune])
-  fit <- lm(phenotype~pc$scores[,1:k])
+  k <- length(pc2[pc2 <= 1- prune])
+  fit <- lm(phenotype~pc$scores[, 1:k])
   f <- summary(fit)$fstatistic
   p <- pf(f[1], f[2], f[3], lower.tail=F)
   return(p)

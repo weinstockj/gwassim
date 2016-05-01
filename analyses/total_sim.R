@@ -9,12 +9,12 @@ LD = .7
 N_COV = 1
 sigma = matrix(LD, nrow = N_MARKERS, ncol = N_MARKERS)
 diag(sigma) = 1
-N_BLOCKS = 3
+N_BLOCKS = 6
 ALLELEFRQ = runif(N_MARKERS, .05, .95)
 N_STRANDS = 2000
 BLOCK_COR = .15
 N_CAUSAL = 3
-EFFECT_SIZE = .01
+EFFECT_SIZE = .05
 PHENO_DIST = "gaussian"
 COR_NOISE_VAR = .0
 config = setConfiguration_(N_MARKERS = N_MARKERS,
@@ -42,11 +42,12 @@ totalSim = function(config){
   res$gates = gates(gene1, gwas, config)
   res$hyst = hyst(gene1, gwas, config)
   res$magma = MAGMA(pheno$phenotype, gene1)
+  res$skat = skat(gene1, pheno = pheno)
   return(res)
 }
 
+ncores = parallel::detectCores() - 1
 #type 1
-# ncores = parallel::detectCores() - 1
 # ptm <- proc.time()
 # N_SIM = 500
 # cl = makeCluster(ncores)
@@ -83,13 +84,14 @@ for(par in pars) {
   resSummary[[par]] = config[[par]]
 }
 
-resSummar$N_SIM = N_SIM
+resSummary$N_SIM = N_SIM
+resSummary$type = ifelse(resSummary$EFFECT_SIZE == 0, "type 1", "type 2")
 
 resSummary = resSummary[c(pars, setdiff(names(resSummary), pars))]
 
 if(!file.exists(RESULT_FILE)) {
   write.table(resSummary, file = RESULT_FILE, row.names = F, sep = ",")
 } else {
-  write.table(resSummary, file = RESULT_FILE, row.names = F, append = T, sep = ","
-              headers = F)
+  write.table(resSummary, file = RESULT_FILE, row.names = F, append = T, sep = ",",
+              col.names = F)
 }
