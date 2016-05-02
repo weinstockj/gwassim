@@ -5,7 +5,7 @@ RESULT_FILE = "analyses/simulation_results.csv"
 N_SIM = 1000
 
 N_MARKERS = 5
-LD = .7
+LD = .3
 N_COV = 1
 sigma = matrix(LD, nrow = N_MARKERS, ncol = N_MARKERS)
 diag(sigma) = 1
@@ -13,8 +13,8 @@ N_BLOCKS = 6
 ALLELEFRQ = runif(N_MARKERS, .05, .95)
 N_STRANDS = 2000
 BLOCK_COR = .15
-N_CAUSAL = 3
-EFFECT_SIZE = .05
+N_CAUSAL = 2
+EFFECT_SIZE = .01
 PHENO_DIST = "gaussian"
 COR_NOISE_VAR = .0
 config = setConfiguration_(N_MARKERS = N_MARKERS,
@@ -25,7 +25,7 @@ config = setConfiguration_(N_MARKERS = N_MARKERS,
   BLOCK_COR = BLOCK_COR, N_CAUSAL = N_CAUSAL,
   PHENO_DIST = PHENO_DIST,
   EFFECT_SIZE = EFFECT_SIZE, COR_NOISE_VAR = COR_NOISE_VAR)
-
+      
 totalSim = function(config){
   gene1 = simBlockSet(config)
   pheno = simPhenotype(config, gene1)
@@ -42,7 +42,7 @@ totalSim = function(config){
   res$gates = gates(gene1, gwas, config)
   res$hyst = hyst(gene1, gwas, config)
   res$magma = MAGMA(pheno$phenotype, gene1)
-  res$skat = skat(gene1, pheno = pheno)
+  res$skat = skat(gene1, pheno = pheno, config = config)
   return(res)
 }
 
@@ -63,11 +63,11 @@ ncores = parallel::detectCores() - 1
 
 #type 2
 ptm <- proc.time()
-cl = makeCluster(ncores)
-clusterExport(cl, varlist = c("totalSim", "config"))
-clusterEvalQ(cl, {library(gwassim)})
-res = parLapply(cl, 1:N_SIM, function(x) totalSim(config))
-stopCluster(cl)
+cl = parallel::makeCluster(ncores)
+parallel::clusterExport(cl, varlist = c("totalSim", "config"))
+parallel::clusterEvalQ(cl, {library(gwassim)})
+res = parallel::parLapply(cl, 1:N_SIM, function(x) totalSim(config))
+parallel::stopCluster(cl)
 res = Reduce("rbind", res)
 proc.time() - ptm
 #

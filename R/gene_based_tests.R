@@ -11,9 +11,7 @@ fisherHelper = function(x){
   return(pval)
 }
 
-fisher = name <- function(variables) {
-  
-}
+fisher = function(gwas){
   result = fisherHelper(gwas)
   return(result)
 }
@@ -140,17 +138,17 @@ skat = function(gene, pheno, config) {
   # class(Z) = c(NECESSARY_CLASS, setdiff(Z_classes, NECESSARY_CLASS))
   class(Z) = NECESSARY_CLASS
   obj = SKAT::SKAT_Null_Model(pheno$phenotype ~ 1, out_type = SKAT_DIST_LABEL)
-  mod = SKAT::SKAT(Z, obj)
+  mod = SKAT::SKAT_CommonRare(Z, obj)
   return(mod$p.value)
 }
 
 
 MAGMA <- function(phenotype, SNP_matrix, prune = .001){
-  pc <- princomp(SNP_matrix, cor=FALSE, scores=TRUE)
-  pc2 <- cumsum(pc$sdev^2/sum(pc$sdev^2))
-  k <- length(pc2[pc2 <= 1- prune])
-  fit <- lm(phenotype~pc$scores[, 1:k])
+  pc <- princomp(SNP_matrix, cor = FALSE, scores = TRUE)
+  pc2 <- cumsum(pc$sdev ^ 2 / sum(pc$sdev ^ 2))
+  k <- length(pc2[pc2 <= 1 - prune])
+  fit <- lm(phenotype ~ pc$scores[, 1:k])
   f <- summary(fit)$fstatistic
-  p <- pf(f[1], f[2], f[3], lower.tail=F)
+  p <- pf(f[1], f[2], f[3], lower.tail = F)
   return(p)
 }
