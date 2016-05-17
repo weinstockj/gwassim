@@ -2,12 +2,24 @@
 // Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 #include "../inst/include/gwassim.h"
+#include <RcppEigen.h>
 #include <Rcpp.h>
 #include <string>
 #include <set>
 
 using namespace Rcpp;
 
+// gatesHelper_
+double gatesHelper_(NumericMatrix mat);
+RcppExport SEXP gwassim_gatesHelper_(SEXP matSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericMatrix >::type mat(matSEXP);
+    __result = Rcpp::wrap(gatesHelper_(mat));
+    return __result;
+END_RCPP
+}
 // traverse_cor
 std::vector<int> traverse_cor(NumericMatrix x, float maxcor);
 static SEXP gwassim_traverse_cor_try(SEXP xSEXP, SEXP maxcorSEXP) {
@@ -38,6 +50,30 @@ RcppExport SEXP gwassim_traverse_cor(SEXP xSEXP, SEXP maxcorSEXP) {
     }
     UNPROTECT(1);
     return __result;
+}
+// get_chol
+Eigen::MatrixXd get_chol(const Eigen::Map<Eigen::MatrixXd>& A);
+RcppExport SEXP gwassim_get_chol(SEXP ASEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd>& >::type A(ASEXP);
+    __result = Rcpp::wrap(get_chol(A));
+    return __result;
+END_RCPP
+}
+// rmvnorm_
+NumericMatrix rmvnorm_(const int n, const NumericVector mu, Eigen::Map<Eigen::MatrixXd> sigma);
+RcppExport SEXP gwassim_rmvnorm_(SEXP nSEXP, SEXP muSEXP, SEXP sigmaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< const int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< const NumericVector >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type sigma(sigmaSEXP);
+    __result = Rcpp::wrap(rmvnorm_(n, mu, sigma));
+    return __result;
+END_RCPP
 }
 
 // validate (ensure exported C++ functions exist before calling them)

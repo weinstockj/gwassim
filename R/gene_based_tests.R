@@ -37,10 +37,11 @@ vegas = function(gene, gwas){
 
 vegasHelper = function(gene, gwas, N) {
   chi = sum(qchisq(gwas$pvalue, 1, lower.tail = FALSE))
-  R = mvtnorm::rmvnorm(N, mean = rep(0, ncol(gene)), sigma = cor(gene), method ='chol')
+  # R = mvtnorm::rmvnorm(N, mean = rep(0, ncol(gene)), sigma = cor(gene), method ='chol')
+  R = rmvnorm_(N, mu = rep(0, ncol(gene)), sigma = cor(gene))
   R = R ^ 2
-  R = apply(R, 1, sum)
-  p = length(R[R > chi]) / N
+  R = rowSums(R)
+  p = sum(R > chi) / N
   return(p)
 }
 
@@ -68,18 +69,10 @@ gatesHelper = function(gene, snp_names, config){
   # stopifnot(inherits(gene, "genosim"))
   markers = gene[, snp_names, drop = F]
   mat = addCorNoise(cor(markers), config)
-  changeR = function(x) {
-    0.2982 * x ^ 6 - 0.0127 * x ^ 5 + 0.0588 * x ^ 4 +
-      0.0099 * x ^ 3 + 0.628 * x ^ 2 - 0.0009 * x
-  }
-  mat = apply(mat, 1:2, function(x) changeR(x))
-  decomp = eigen(mat)
-  eigenvals = decomp$values
-  eigenvals = eigenvals[eigenvals > 1]
-  val = sum(eigenvals - 1)
-  M = length(snp_names) - val
+  M = gatesHelper_(mat)
   return(M)
 }
+
 
 hyst = function(gene, gwas, config){
   blocks = blockFromSnp(colnames(gene), config)

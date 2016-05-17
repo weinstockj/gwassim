@@ -123,10 +123,10 @@ simGWAS = function(gene, pheno, config, parallel = F, cl){
 }
 
 snpTest = function(snpName, dat, dist){
-  SNP = dat[, snpName]
-  pheno = dat[, "pheno"]
+  SNP = dat[[snpName]]
+  pheno = dat[["pheno"]]
   if(dist == "gaussian"){
-    lmod = summary(lm(pheno ~ SNP))
+    lmod = summary(RcppEigen::fastLm(pheno ~ SNP))
     beta = lmod$coefficients[, "Estimate"][2]
     se = lmod$coefficients[, "Std. Error"][2]
     pvalue = lmod$coefficients[, "Pr(>|t|)"][2]

@@ -4,6 +4,7 @@
 #ifndef __gwassim_RcppExports_h__
 #define __gwassim_RcppExports_h__
 
+#include <RcppEigen.h>
 #include <Rcpp.h>
 
 namespace gwassim {
