@@ -1,3 +1,9 @@
+#' called by \link{setConfiguration}
+#' @details advanced users are recommended to simply view the source code to view all
+#' available options by typing in setConfiguration_ into an interactive R console
+#'
+#' @return Returns a list
+#' @export
 setConfiguration_ = function(N_MARKERS, LD, simple_interface,
   sigma, N_COV, ALLELEFRQ, N_STRANDS, N_ALLELES = N_MARKERS * 2,
   N_BLOCKS, BLOCK_COR, EFFECT_SIZE = .01, N_CAUSAL = 5, N_CAUSAL_PER_BLOCK = 1,
@@ -10,6 +16,17 @@ setConfiguration_ = function(N_MARKERS, LD, simple_interface,
     PHENO_SD = PHENO_SD, PHENO_DIST = PHENO_DIST, COR_NOISE_VAR = COR_NOISE_VAR)
 }
 
+#' sets the configuration for the simulations
+#' @param LD can be set as low, medium, or high
+#' @param N_BLOCKS is the number of LD blocks generated
+#' @param N_MARKERS is the number of SNPs per LD block
+#'
+#' @details
+#' these parameters are passed on to \link{setConfiguration_}
+#' which creates the list configruation object. By default
+#' one causal SNP is used with an effect size of .01 Rsquared.
+#' The phenotype is assumed to be Gaussian.
+#' @export
 setConfiguration = function(LD, N_BLOCKS, N_MARKERS) {
   stopifnot(LD %in% c("low", "medium", "high"))
   LD = switch(LD,
@@ -27,7 +44,7 @@ setConfiguration = function(LD, N_BLOCKS, N_MARKERS) {
   EFFECT_SIZE = .01
   PHENO_DIST = "gaussian"
   COR_NOISE_VAR = .02
-  config = setConfiguration(N_MARKERS = N_MARKERS,
+  config = setConfiguration_(N_MARKERS = N_MARKERS,
                             LD = LD, sigma = sigma, N_COV = N_COV, ALLELEFRQ = ALLELEFRQ,
                             N_STRANDS = N_STRANDS,
                             N_BLOCKS = N_BLOCKS,
@@ -37,6 +54,10 @@ setConfiguration = function(LD, N_BLOCKS, N_MARKERS) {
 
 }
 
+#' Simulates a covariance matrix for an LD block
+#' @param config An object created by \link{setConfiguration}
+#' @return a matrix representing the LD of the block
+#' @export
 simCov = function(config, limitZ = 1){
   N_MARKERS = config[["N_MARKERS"]]
   N_COV = config[["N_COV"]]
@@ -72,6 +93,10 @@ simBlock = function(config){
   return(block)
 }
 
+#' generates a matrix of several LD blocks combined together
+#' @param config A list cretaed by \link{setConfiguration}
+#' @return a matrix of several adjacent LD blocks
+#' @export
 simBlockSet = function(config){
   N_BLOCKS = config[["N_BLOCKS"]]
   BLOCK_COR = config[["BLOCK_COR"]]
@@ -103,6 +128,7 @@ getBlock = function(gene, config, block){
   }
   return(gene[, indices])
 }
+
 
 simGWAS = function(gene, pheno, config, parallel = F, cl){
   PHENO_DIST = config[["PHENO_DIST"]]
