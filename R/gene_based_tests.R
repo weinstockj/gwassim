@@ -1,3 +1,5 @@
+#' @export
+# Applies the sidaks pvalue correction
 sidaks = function(gwas){
   result = min(gwas$pvalue)
   result = 1 - (1 - result) ^ nrow(gwas)
@@ -11,16 +13,21 @@ fisherHelper = function(x){
   return(pval)
 }
 
+#' @export
+#' Applies Fisher's pvalue correction
 fisher = function(gwas){
   result = fisherHelper(gwas)
   return(result)
 }
 
+#' Applies Manuel Ferreira's canoncical correlation test
+#' @export
 ccaTest = function(gene, pheno){
   result = as.numeric(geneCCA(gene, pheno$phenotype))
   return(result)
 }
 
+#' @export
 vegas = function(gene, gwas){
   N = 1000
   pval = vegasHelper(gene, gwas, N)
@@ -45,6 +52,7 @@ vegasHelper = function(gene, gwas, N) {
   return(p)
 }
 
+#' @export
 gates = function(gene, gwas, config, retKeySnp = FALSE){
   gwas = gwas[order(gwas$pvalue), ] # order by ascending pvalue
   M = gatesHelper(gene, gwas$snp, config)
@@ -74,6 +82,7 @@ gatesHelper = function(gene, snp_names, config){
 }
 
 
+#' @export
 hyst = function(gene, gwas, config){
   blocks = blockFromSnp(colnames(gene), config)
   res = data.frame(pvalue = numeric(length = length(unique(blocks))),
@@ -118,6 +127,7 @@ scaleTest = function(res, gene, config) {
   return(pval)
 }
 
+#' @export
 skat = function(gene, pheno, config) {
   # Z is matrix of SNPs, in dosage format
   # SKAT fails if class(obj) != "matrix"
@@ -136,12 +146,13 @@ skat = function(gene, pheno, config) {
 }
 
 
-MAGMA <- function(phenotype, SNP_matrix, prune = .001){
-  pc <- princomp(SNP_matrix, cor = FALSE, scores = TRUE)
-  pc2 <- cumsum(pc$sdev ^ 2 / sum(pc$sdev ^ 2))
-  k <- length(pc2[pc2 <= 1 - prune])
-  fit <- lm(phenotype ~ pc$scores[, 1:k])
-  f <- summary(fit)$fstatistic
-  p <- pf(f[1], f[2], f[3], lower.tail = F)
+#' @export
+MAGMA = function(phenotype, SNP_matrix, prune = .001){
+  pc = princomp(SNP_matrix, cor = FALSE, scores = TRUE)
+  pc2 = cumsum(pc$sdev ^ 2 / sum(pc$sdev ^ 2))
+  k = length(pc2[pc2 <= 1 - prune])
+  fit = lm(phenotype ~ pc$scores[, 1:k])
+  f = summary(fit)$fstatistic
+  p = pf(f[1], f[2], f[3], lower.tail = F)
   return(p)
 }

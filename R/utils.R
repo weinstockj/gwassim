@@ -22,10 +22,13 @@ setConfiguration_ = function(N_MARKERS, LD, simple_interface,
 #' @param N_MARKERS is the number of SNPs per LD block
 #'
 #' @details
-#' these parameters are passed on to \link{setConfiguration_}
+#' These parameters are passed on to \link{setConfiguration_}
 #' which creates the list configruation object. By default
 #' one causal SNP is used with an effect size of .01 Rsquared.
 #' The phenotype is assumed to be Gaussian.
+#'
+#' This function is intended to provide a simplied interface
+#' to the setConfiguration_ function.
 #' @export
 setConfiguration = function(LD, N_BLOCKS, N_MARKERS) {
   stopifnot(LD %in% c("low", "medium", "high"))
@@ -57,6 +60,13 @@ setConfiguration = function(LD, N_BLOCKS, N_MARKERS) {
 #' Simulates a covariance matrix for an LD block
 #' @param config An object created by \link{setConfiguration}
 #' @return a matrix representing the LD of the block
+#' @details
+#' Covariance matrix is drawn from Wishart distribution
+#' using the \link{rWishart} function. The most important parameter
+#' to simulate a covariance matrix is the "population" covariance matrix
+#' specified in the configuration object.
+#' This function also ensures that the resulting covariance matrix
+#' is positive definite using the nearPD function from the matrix package.
 #' @export
 simCov = function(config, limitZ = 1){
   N_MARKERS = config[["N_MARKERS"]]
@@ -76,12 +86,40 @@ simCov = function(config, limitZ = 1){
     }
 }
 
-
+#' @param block1 A LD block
+#' @param block2 A LD block
+#' @details canonical correlation is used to determine
+#'  the correlation between two matrices of the same dimension
+#' @return the correlation between two LD blocks
 simBlockR = function(block1, block2){
   res = cancor(block1, block2)$cor
   return(max(res))
 }
 
+#' @param config An object created by \link{setConfiguration}
+simCov = function(config, limitZ = 1){
+  N_MARKERS = config[["N_MARKERS"]]
+  N_COV = config[["N_COV"]]
+  sigma = config[["sigma"]]
+  simple_interface = config[["simple_interface"]]
+  if(simple_interface) {
+    return(sigma)
+  } else {
+      z = Inf
+      while(z > limitZ){
+        sim = rWishart(N_COV, N_MARKERS, sigma)[, , 1]
+        z = psych::cortest(cor(sim), sigma, n1 = N_MARKERS ^ 2)$z
+      }
+      sim = as.matrix(matrix::nearPD(sim)$mat)
+      return(sim)
+    }
+}
+
+#' @param config An object created by \link{setConfiguration}
+#' @details
+#' Generates two chromosomes seperately, and sums them.
+#' Each is generated using a multivariate binomial random variable generator.
+#' See bindata::rmvbin for more details.
 simBlock = function(config){
   N_STRANDS = config[["N_STRANDS"]]
   sigma = config[["sigma"]]
@@ -95,7 +133,16 @@ simBlock = function(config){
 
 #' generates a matrix of several LD blocks combined together
 #' @param config A list cretaed by \link{setConfiguration}
-#' @return a matrix of several adjacent LD blocks
+#' @return a matrix of several adjacent LD blocks of type genosim
+#' @details
+#' The LD blocks are generated separately and are combined
+#' in a greedy fashion. The process is generally as follows:
+#' 1) generate block_1 using the \link{simBlock} function
+#' 2) generate block_2
+#' 3) compare block_1 to block_2 using canonical correlation.
+#' 4) Accept block_2 as the next block in the sequence of LD blocks
+#'    if the between block canonical correlation exceeds the user
+#'    defined BLOCK_COR parameter.
 #' @export
 simBlockSet = function(config){
   N_BLOCKS = config[["N_BLOCKS"]]
@@ -130,6 +177,14 @@ getBlock = function(gene, config, block){
 }
 
 
+#' @export
+#' @param gene the result of a call to \link{simBlockSet}
+#' @param pheno the result of a call to \link{simPhenotype}
+#' @param config An object created by \link{setConfiguration}
+#' @param parallel A logical to determine whether or not the analysis should
+#' be run in parallel.
+#' @param cl a parallel cluster if running the analysis in parallel
+#' @return an object of class gwasresult
 simGWAS = function(gene, pheno, config, parallel = F, cl){
   PHENO_DIST = config[["PHENO_DIST"]]
   df = data.frame(gene, pheno = pheno$phenotype)
@@ -148,6 +203,15 @@ simGWAS = function(gene, pheno, config, parallel = F, cl){
   return(res)
 }
 
+#' @export
+#' @param snpName the name of the snp to run the test on
+#' @param dat the dataframe with the genotype and phenotype attached
+#' @param dist the probability distribution of the phenotype
+#' This function takes the genotype and phenotype information and runs
+#' the association test between the given SNP and the phenotype.
+#' The association test is either linear or logistic regression as determined
+#' by the distribution of the phenotype.
+#' @return the pvalue
 snpTest = function(snpName, dat, dist){
   SNP = dat[[snpName]]
   pheno = dat[["pheno"]]
@@ -168,13 +232,19 @@ snpTest = function(snpName, dat, dist){
   return(data.frame(snp = snpName, beta = beta, se = se, pvalue = pvalue))
 }
 
+#' creates an LD heatmap of the genotype data
+#' @export
 plot.genosim = function(x) {
   if(requireNamespace("LDheatmap", quietly = TRUE)) {
     rgb.palette = colorRampPalette(rev(c("blue", "red")), space = "rgb")
-    LDheatmap::LDheatmap(cor(x),  flip = T, color=rgb.palette(18))
+    LDheatmap::LDheatmap(cor(x),  flip = TRUE, color=rgb.palette(18))
   }
 }
 
+#' @export
+#' @param x the result of a simulated GWAS
+#' @param type specificies manhattan vs qqplot
+#  @return a plot from ggplot2 call
 plot.gwasresult = function(x, type = "manhattan"){
   if(type == "manhattan"){
     ggplot2::ggplot(data = data.frame(x, number = 1:nrow(x)),
@@ -195,12 +265,12 @@ plot.gwasresult = function(x, type = "manhattan"){
 qq = function(pvector, title="Quantile-quantile plot of p-values") {
   # http://gettinggeneticsdone.blogspot.com/2009/11/qq-plots-of-p-values-in-r-using-ggplot2.html
   # Thanks to Daniel Shriner at NHGRI for providing this code for creating expected and observed values
-  o = -log10(sort(pvector,decreasing=F))
-  e = -log10( 1:length(o)/length(o) )
-  plot=ggplot2::qplot(e,o, xlim=c(0,max(e)), ylim=c(0,max(o))) + ggplot2::stat_abline(intercept=0,slope=1, col="red")
-  plot=plot+ggplot2::ggtitle(title) + ggthemes::theme_tufte()
-  plot=plot+ggplot2::xlab(expression(Expected~~-log[10](italic(p))))
-  plot=plot+ggplot2::ylab(expression(Observed~~-log[10](italic(p))))
+  o = -log10(sort(pvector, decreasing = FALSE))
+  e = -log10(1:length(o) / length(o) )
+  plot = ggplot2::qplot(e, o, xlim = c(0, max(e)), ylim = c(0, max(o))) + ggplot2::stat_abline(intercept = 0, slope = 1, col = "red")
+  plot = plot + ggplot2::ggtitle(title) + ggthemes::theme_tufte()
+  plot = plot + ggplot2::xlab(expression(Expected~~-log[10](italic(p))))
+  plot = plot + ggplot2::ylab(expression(Observed~~-log[10](italic(p))))
 }
 
 blockFromSnp = function(snpname, config){
@@ -224,6 +294,11 @@ blockFromSnp = function(snpname, config){
 
 blockFromSnp = Vectorize(blockFromSnp, vectorize.args = "snpname")
 
+#' Adds some multivariate gaussian noise to a correlation matrix.
+#' The noise matrix is made symmetric so that the covariance matrix is
+#' still Hermitian (i.e., real eigenvalues, etc.)
+#' @return a matrix
+#' @export
 addCorNoise = function(mat, config) {
   N_ROWS = nrow(mat)
   N_COLS = ncol(mat)

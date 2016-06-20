@@ -1,5 +1,3 @@
-#' Add together two numbers.
-#'
 #' @param config A configuration object.
 #' @param gene A genosim object.
 #' @return An object of class phenosim. Includes simulated phenotype,
@@ -74,6 +72,7 @@ simPhenotype = function(config, gene, verbose = F){
   return(phenoList)
 }
 
+#' @export
 print.phenosim = function(x){
   cat("\nHere are the properties of the simulated phenotype:\n")
   cat(sprintf("\nChosen SNPs: %s", paste(x$markers, collapse = ", ")))
@@ -85,6 +84,7 @@ print.phenosim = function(x){
 
 }
 
+#' @export
 summary.phenosim = function(x){
   print(x)
 }

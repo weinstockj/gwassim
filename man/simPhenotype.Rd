@@ -2,7 +2,6 @@
 % Please edit documentation in R/simulate_phenotype.R
 \name{simPhenotype}
 \alias{simPhenotype}
-\title{Add together two numbers.}
 \usage{
 simPhenotype(config, gene, verbose = F)
 }
@@ -14,8 +13,5 @@ simPhenotype(config, gene, verbose = F)
 \value{
 An object of class phenosim. Includes simulated phenotype,
 causal blocks, causal markers, and structure
-}
-\description{
-Add together two numbers.
 }
 
