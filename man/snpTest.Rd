@@ -2,6 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{snpTest}
 \alias{snpTest}
+\title{Run association test between SNP and phenotype}
 \usage{
 snpTest(snpName, dat, dist)
 }
@@ -18,5 +19,8 @@ by the distribution of the phenotype.}
 }
 \value{
 the pvalue
+}
+\description{
+Run association test between SNP and phenotype
 }
 

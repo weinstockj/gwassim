@@ -2,6 +2,7 @@
 % Please edit documentation in R/simulate_phenotype.R
 \name{simPhenotype}
 \alias{simPhenotype}
+\title{Simulate phenotype data}
 \usage{
 simPhenotype(config, gene, verbose = F)
 }
@@ -13,5 +14,8 @@ simPhenotype(config, gene, verbose = F)
 \value{
 An object of class phenosim. Includes simulated phenotype,
 causal blocks, causal markers, and structure
+}
+\description{
+Simulate phenotype data
 }
 

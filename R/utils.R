@@ -91,6 +91,8 @@ simCov = function(config, limitZ = 1){
 #' @details canonical correlation is used to determine
 #'  the correlation between two matrices of the same dimension
 #' @return the correlation between two LD blocks
+#' @title Find the correlation between two blocks
+#' @name simBlockR
 simBlockR = function(block1, block2){
   res = cancor(block1, block2)$cor
   return(max(res))
@@ -120,6 +122,8 @@ simCov = function(config, limitZ = 1){
 #' Generates two chromosomes seperately, and sums them.
 #' Each is generated using a multivariate binomial random variable generator.
 #' See bindata::rmvbin for more details.
+#' @title Simulate an LD block
+#' @name simBlock
 simBlock = function(config){
   N_STRANDS = config[["N_STRANDS"]]
   sigma = config[["sigma"]]
@@ -144,6 +148,8 @@ simBlock = function(config){
 #'    if the between block canonical correlation exceeds the user
 #'    defined BLOCK_COR parameter.
 #' @export
+#' @title Simulated genotype data
+#' @name simBlockSet
 simBlockSet = function(config){
   N_BLOCKS = config[["N_BLOCKS"]]
   BLOCK_COR = config[["BLOCK_COR"]]
@@ -185,6 +191,8 @@ getBlock = function(gene, config, block){
 #' be run in parallel.
 #' @param cl a parallel cluster if running the analysis in parallel
 #' @return an object of class gwasresult
+#' @title Get simulated GWAS results
+#' @name simGWAS
 simGWAS = function(gene, pheno, config, parallel = F, cl){
   PHENO_DIST = config[["PHENO_DIST"]]
   df = data.frame(gene, pheno = pheno$phenotype)
@@ -212,6 +220,8 @@ simGWAS = function(gene, pheno, config, parallel = F, cl){
 #' The association test is either linear or logistic regression as determined
 #' by the distribution of the phenotype.
 #' @return the pvalue
+#' @title Run association test between SNP and phenotype
+#' @name snpTest
 snpTest = function(snpName, dat, dist){
   SNP = dat[[snpName]]
   pheno = dat[["pheno"]]
@@ -234,6 +244,8 @@ snpTest = function(snpName, dat, dist){
 
 #' creates an LD heatmap of the genotype data
 #' @export
+#' @title Plot simulated genotype data
+#' @name plot.genosim
 plot.genosim = function(x) {
   if(requireNamespace("LDheatmap", quietly = TRUE)) {
     rgb.palette = colorRampPalette(rev(c("blue", "red")), space = "rgb")
@@ -245,6 +257,8 @@ plot.genosim = function(x) {
 #' @param x the result of a simulated GWAS
 #' @param type specificies manhattan vs qqplot
 #  @return a plot from ggplot2 call
+#' @title Plot simulated GWAS result data
+#' @name plot.gwasresult
 plot.gwasresult = function(x, type = "manhattan"){
   if(type == "manhattan"){
     ggplot2::ggplot(data = data.frame(x, number = 1:nrow(x)),

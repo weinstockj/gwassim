@@ -2,6 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{simBlockR}
 \alias{simBlockR}
+\title{Find the correlation between two blocks}
 \usage{
 simBlockR(block1, block2)
 }
@@ -12,6 +13,9 @@ simBlockR(block1, block2)
 }
 \value{
 the correlation between two LD blocks
+}
+\description{
+Find the correlation between two blocks
 }
 \details{
 canonical correlation is used to determine

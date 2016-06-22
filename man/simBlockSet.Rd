@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{simBlockSet}
 \alias{simBlockSet}
-\title{generates a matrix of several LD blocks combined together}
+\title{Simulated genotype data}
 \usage{
 simBlockSet(config)
 }

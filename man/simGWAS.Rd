@@ -2,6 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{simGWAS}
 \alias{simGWAS}
+\title{Get simulated GWAS results}
 \usage{
 simGWAS(gene, pheno, config, parallel = F, cl)
 }
@@ -19,5 +20,8 @@ be run in parallel.}
 }
 \value{
 an object of class gwasresult
+}
+\description{
+Get simulated GWAS results
 }
 

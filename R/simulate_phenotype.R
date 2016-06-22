@@ -2,7 +2,8 @@
 #' @param gene A genosim object.
 #' @return An object of class phenosim. Includes simulated phenotype,
 #' causal blocks, causal markers, and structure
-
+#' @title Simulate phenotype data
+#' @name simPhenotype
 
 simPhenotype = function(config, gene, verbose = F){
   N_CAUSAL_PER_BLOCKS = config[["N_CAUSAL_PER_BLOCK"]]

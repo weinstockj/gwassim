@@ -1,5 +1,5 @@
+#' Applies the sidaks pvalue correction
 #' @export
-# Applies the sidaks pvalue correction
 sidaks = function(gwas){
   result = min(gwas$pvalue)
   result = 1 - (1 - result) ^ nrow(gwas)
@@ -13,8 +13,9 @@ fisherHelper = function(x){
   return(pval)
 }
 
-#' @export
 #' Applies Fisher's pvalue correction
+#'
+#' @export
 fisher = function(gwas){
   result = fisherHelper(gwas)
   return(result)

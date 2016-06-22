@@ -2,11 +2,15 @@
 % Please edit documentation in R/utils.R
 \name{simBlock}
 \alias{simBlock}
+\title{Simulate an LD block}
 \usage{
 simBlock(config)
 }
 \arguments{
 \item{config}{An object created by \link{setConfiguration}}
+}
+\description{
+Simulate an LD block
 }
 \details{
 Generates two chromosomes seperately, and sums them.

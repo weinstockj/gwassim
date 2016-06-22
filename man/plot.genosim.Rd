@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{plot.genosim}
 \alias{plot.genosim}
-\title{creates an LD heatmap of the genotype data}
+\title{Plot simulated genotype data}
 \usage{
 \method{plot}{genosim}(x)
 }

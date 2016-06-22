@@ -2,6 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{plot.gwasresult}
 \alias{plot.gwasresult}
+\title{Plot simulated GWAS result data}
 \usage{
 \method{plot}{gwasresult}(x, type = "manhattan")
 }
@@ -9,5 +10,8 @@
 \item{x}{the result of a simulated GWAS}
 
 \item{type}{specificies manhattan vs qqplot}
+}
+\description{
+Plot simulated GWAS result data
 }
 
