@@ -5,24 +5,25 @@ Authors@R: as.person(c(
     "Josh Weinstock <jwein22@emory.edu> [aut, cre]",
     "Hasse Walum <hasse.walum@emory.edu> [aut]"
   ))
-Description: Provides functions for simulating GWAS data and applying gene-based tests
-Depends: R (>= 3.1.0)
+Description: Provides functions for simulating GWAS data and applying gene-based
+    tests
+Depends:
+    R (>= 3.1.0)
 License: What license is it under?
 LazyData: true
 LinkingTo: Rcpp,
- RcppEigen
+    RcppEigen
 Imports:
-  bindata,
-  ggplot2,
-  ggthemes,
-  psych,
-  Matrix,
-  Rcpp (>= 0.11.2),
-  mvtnorm,
-  LDheatmap,
-  MASS,
-  SKAT
+    bindata,
+    ggplot2,
+    ggthemes,
+    psych,
+    Matrix,
+    Rcpp (>= 0.11.2),
+    mvtnorm,
+    LDheatmap,
+    MASS,
+    SKAT
 Suggests:
- parallel
-
-
+    parallel
+RoxygenNote: 5.0.1
